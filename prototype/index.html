@@ -369,6 +369,12 @@
   .sheet .smeta{font-size:11.5px;color:#948C7C;margin-top:4px;letter-spacing:.04em}
   .sheet .acts{display:flex;gap:10px;margin-top:14px}
   .sheet .acts .btn{flex:1;padding:11px 0;font-size:13.5px}
+  .rec-play{display:flex;align-items:center;gap:10px;margin-top:13px;background:#F5EFE2;border-radius:12px;padding:8px 12px}
+  .rec-play .rp-btn{width:30px;height:30px;border:none;border-radius:50%;background:#B34639;color:#FFF6EA;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
+  .rec-play .rp-btn svg{width:14px;height:14px}
+  .rec-play .rp-bar{flex:1;height:4px;border-radius:4px;background:rgba(90,82,66,.16);overflow:hidden}
+  .rec-play .rp-bar i{display:block;height:100%;width:38%;background:#B34639;border-radius:4px}
+  .rec-play .rp-time{font-size:10.5px;color:#948C7C;font-variant-numeric:tabular-nums;flex:none}
   .brief-txt{font-size:13px;line-height:1.95;color:#5A554A;margin-top:10px}
   .brief-txt b{color:#B34639;font-weight:600}
   .oklay{position:absolute;inset:0;z-index:66;display:none;align-items:center;justify-content:center;background:rgba(247,242,230,.93)}
@@ -850,12 +856,12 @@
               </div>
             </div>
             <div class="task-rec">
-              <div class="rec-timer" id="recTimer">00:00</div>
+              <div class="rec-timer" id="recTimer">0:00</div>
               <button class="micbtn" id="micBtn" onclick="micTap()" aria-label="录音">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4"/><path d="M8 22h8"/></svg>
               </button>
               <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i></div>
-              <div class="rec-hint" id="recHint">点话筒开始朗读 · 点页签切换原文 / 注释 / 译文</div>
+              <div class="rec-hint" id="recHint">点话筒开始朗读 · 左右滑动切换原文 / 注释 / 译文</div>
             </div>
           </section>
 
@@ -1025,7 +1031,7 @@
           <div class="panel">
             <h3>任务描述</h3>
             <div class="smeta" id="briefMeta">鹿柴 · [唐] 王维 · 四年级上</div>
-            <p class="brief-txt">依次朗读<b>原文、注释、译文</b>各一遍。点「做任务」进入全屏朗读页，点页签切换原文 / 注释 / 译文；点话筒开始录音，读完点方块停止，可放弃、重录，满意后保存打卡。</p>
+            <p class="brief-txt">依次朗读<b>原文、注释、译文</b>各一遍。点「做任务」进入朗读页，左右滑动或点页签切换原文、注释、译文；点话筒开始录音，读完点方块停止，可回放、重录，满意后保存打卡。</p>
             <div class="acts"><button class="btn btn-primary" onclick="closeBrief()">我知道了</button></div>
           </div>
         </div>
@@ -1034,8 +1040,13 @@
         <div class="sheet" id="recSheet">
           <div class="veil" onclick="discardRec(true)"></div>
           <div class="panel">
-            <h3 id="recSheetTitle">鹿柴</h3>
-            <div class="smeta" id="recSheetMeta">时长 00:12 · 11月23日</div>
+            <h3 id="recSheetTitle">朗读完成</h3>
+            <div class="smeta" id="recSheetMeta">时长 0:12 · 11月23日</div>
+            <div class="rec-play">
+              <button class="rp-btn" onclick="toggleRecPlay(this)" aria-label="播放/暂停"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg></button>
+              <span class="rp-bar"><i></i></span>
+              <span class="rp-time" id="recPlayTime">0:12</span>
+            </div>
             <div class="acts">
               <button class="btn btn-ghost" onclick="discardRec(false)">放弃</button>
               <button class="btn btn-ghost" onclick="retryRec()">重录</button>
@@ -6146,6 +6157,21 @@ function openBrief(){
 function closeBrief(){
   document.getElementById('briefSheet').classList.remove('on');
 }
+
+/* 左右滑动切换页签（与应用同步） */
+let swipeX = null, tSwipeX = null;
+document.getElementById('pages').addEventListener('touchstart', e=>{ swipeX = e.touches[0].clientX }, {passive:true});
+document.getElementById('pages').addEventListener('touchend', e=>{
+  if(swipeX === null) return;
+  const dx = e.changedTouches[0].clientX - swipeX; swipeX = null;
+  if(Math.abs(dx) > 36) setPage(curPage() + (dx < 0 ? 1 : -1));
+}, {passive:true});
+document.getElementById('taskPages').addEventListener('touchstart', e=>{ tSwipeX = e.touches[0].clientX }, {passive:true});
+document.getElementById('taskPages').addEventListener('touchend', e=>{
+  if(tSwipeX === null) return;
+  const dx = e.changedTouches[0].clientX - tSwipeX; tSwipeX = null;
+  if(Math.abs(dx) > 36) setTaskPage(curTaskPage() + (dx < 0 ? 1 : -1));
+}, {passive:true});
 function setDay(btn){
   document.querySelectorAll('#dayBar .dtab').forEach(d=>d.classList.remove('on'));
   btn.classList.add('on');
@@ -6184,7 +6210,7 @@ function playDemo(){
 let recStep = 'idle', recTimerId = null, recSec = 0;
 
 function fmt(sec){
-  const m = String(Math.floor(sec/60)).padStart(2,'0');
+  const m = Math.floor(sec/60);
   const s = String(sec%60).padStart(2,'0');
   return m + ':' + s;
 }
@@ -6202,25 +6228,35 @@ function updateMic(){
     mic.classList.remove('rec');
     mic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4"/><path d="M8 22h8"/></svg>';
     wave.classList.remove('on');
-    hint.textContent = '点话筒开始朗读 · 点页签切换原文 / 注释 / 译文';
-    document.getElementById('recTimer').textContent = '00:00';
+    hint.textContent = '点话筒开始朗读 · 左右滑动切换原文 / 注释 / 译文';
+    document.getElementById('recTimer').textContent = '0:00';
   }
 }
 
 function openRecSheet(){
   document.getElementById('recSheetTitle').textContent = currentPoem.title;
   document.getElementById('recSheetMeta').textContent = '时长 ' + fmt(recSec) + ' · 11月23日';
+  document.getElementById('recPlayTime').textContent = fmt(recSec);
+  const pb = document.querySelector('#recSheet .rp-btn');
+  pb.classList.remove('playing');
+  pb.innerHTML = ICON_PLAY;
   document.getElementById('recSheet').classList.add('on');
 }
 function closeRecSheet(){
   document.getElementById('recSheet').classList.remove('on');
 }
 
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></svg>';
+function toggleRecPlay(btn){
+  btn.innerHTML = btn.classList.toggle('playing') ? ICON_PAUSE : ICON_PLAY;
+}
+
 function micTap(){
   if(recStep === 'idle'){
     recStep = 'live';
     recSec = 0;
-    document.getElementById('recTimer').textContent = '00:00';
+    document.getElementById('recTimer').textContent = '0:00';
     recTimerId = setInterval(()=>{
       recSec++;
       document.getElementById('recTimer').textContent = fmt(recSec);
