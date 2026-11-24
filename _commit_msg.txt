@@ -1,7 +1,0 @@
-整理为可发布结构：PWA 上提至根目录，原型移至 prototype/
-
-- 根目录提供应用入口 index.html / data.js / manifest.json / sw.js / 图标
-- prototype/index.html：学生端演示原型（单文件）
-- source/：原「资源」目录，原始 JSON 数据
-- tools/：构建脚本（数据、图标），路径已适配新结构
-- 新增 .gitignore（排除设计参考图、分享包、截图）与 .nojekyll
