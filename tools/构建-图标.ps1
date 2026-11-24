@@ -1,7 +1,7 @@
 ﻿# 生成应用图标（icon-192 / icon-512 / apple-touch-icon），印章风格：朱砂底 + 白色"诗"字
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
-$dir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$dir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
 function New-AppIcon([int]$size, [string]$file) {
     $bmp = New-Object System.Drawing.Bitmap($size, $size)

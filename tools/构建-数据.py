@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""从 资源/古诗词-全库.json 生成 app/data.js（应用内置数据，勿手改 data.js）。"""
+"""从 source/古诗词-全库.json 生成根目录 data.js（应用内置数据，勿手改 data.js）。"""
 import json
 import pathlib
 
 BASE = pathlib.Path(__file__).resolve().parent
-SRC = BASE.parent / "资源" / "古诗词-全库.json"
-OUT = BASE / "data.js"
+SRC = BASE.parent / "source" / "古诗词-全库.json"
+OUT = BASE.parent / "data.js"
 
 data = json.loads(SRC.read_text(encoding="utf-8"))
 poems = data["poems"]
