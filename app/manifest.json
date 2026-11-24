@@ -1,0 +1,15 @@
+{
+  "name": "古诗词诵读打卡",
+  "short_name": "诗词打卡",
+  "description": "小学古诗词诵读打卡（统编版 112 首，原文 / 注释 / 译文提词朗读）",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F7F2E6",
+  "theme_color": "#B34639",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
